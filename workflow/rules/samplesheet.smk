@@ -1,67 +1,57 @@
-species_key = {
-    'Ecoli': 'Escherichia coli',
-    'Bifido': 'Bifidobacterium spp',
-    'Bovatus': 'Bacteroides ovatus/xylanisolvens',
-    'Efaecalis': 'Enterococcus faecalis',
-    'Koxytoca': 'Klebsiella oxytoca',
-    'Control': None
-}
-
-
 rule:
     output:
         'results/raw_seq_info.csv'
     params:
-        url=config['seq_info_url']
+        path=config['samplesheet']['seq_info']
     resources:
         slurm_partition='datatransfer'
     localrule: True
+    envmodules:
+        'rclone/1.67.0'
     shell:
-        'wget -nc -O {output} {params.url}'
+        'rclone copyto "nextcloud:{params.path}" {output}'
 
 
 rule:
     output:
         'results/raw_sample_info.xlsx'
     params:
-        url=config['sample_info_url']
+        path=config['samplesheet']['sample_info']
     resources:
         slurm_partition='datatransfer'
     localrule: True
+    envmodules:
+        'rclone/1.67.0'
     shell:
-        'wget -nc -O {output} {params.url}'
+        'rclone copyto "nextcloud:{params.path}" {output}'
 
 
 checkpoint samplesheet:
     input:
-        ancient('results/raw_sample_info.xlsx')
+        'results/raw_sample_info.xlsx'
+    params:
+        data_glob=f"'{config['data']['directory']}*.fastq.gz'"
     output:
-        'results/samplesheet.csv'
+        multiext('results/samplesheet', '.duckdb', '.csv')
     localrule: True
-    run:
-        import babybiome_samplesheet_utils as bbb
-        import pandas as pd
+    envmodules:
+        'duckdb/1.0'
+    shell:
+        '''
+        export MEMORY_LIMIT="8GB" \
+               SLURM_CPUS_PER_TASK=2 \
+               FASTQS_DIR={params.data_glob} \
+               SAMPLESHEET="{input}"
 
-        read_kwargs = {
-            'engine': 'openpyxl',
-            'names': ['ID', 'species', 'relationship']
-        }
+        duckdb {output[0]} \
+            -c ".read workflow/scripts/create_fastqs_db.sql"
 
-        (
-            pd.read_excel(input[0], **read_kwargs)
-            .assign(
-                donor=lambda df: bbb.utils.extract_donor_id(df['ID']),
-                ID=lambda df: df['ID'].replace(regex={'_': '-'}),
-            )
-            .pipe(bbb.create_samplesheet, directory=config['data']['directory'])
+        duckdb -init workflow/scripts/create_types.sql {output[0]} \
+            -c ".read workflow/scripts/create_sample_info_db.sql"
 
-            # Create unique identifier, `sample`
-            .rename_axis('sample')
-            .reset_index()
-            .dropna()
-            .pipe(bbb.SamplesheetSchema.validate)
-            .to_csv(output[0], index=False)
-        )
+        duckdb -csv -init workflow/scripts/create_samplesheet_db.sql {output[0]} \
+            -c "set enable_progress_bar = false; copy samplesheet to '/dev/stdout';" > {output[1]}
+        '''
 
 
 rule:

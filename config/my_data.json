@@ -3,6 +3,10 @@
     "directory": "/ptmp/thosi/datasets/230119_B001_Lib/data/",
     "pat": "r'S\\d+_R([12])_001.fastq.gz'"
   },
-  "seq_info_url": "https://transfer.mpiib-berlin.mpg.de/remote.php/dav/files/63595F6C-C750-4D11-B19C-4D850BB5C0B1/keylab/sequencing_records/sequencing_run_logs/230119_B001_Lib/2023_01_19_sequencing_run_log_B001_P1toP8.csv",
-  "sample_info_url": "https://transfer.mpiib-berlin.mpg.de/remote.php/dav/files/63595F6C-C750-4D11-B19C-4D850BB5C0B1/keylab/projects/2020_infantMbiome/Familien/Baby001/Library_Prep/2023_01_B001_Plate1to8/2022_12_12allPrepFORLibrary.xlsx"
+  "samplesheet": {
+    "seq_info": "keylab/sequencing_records/sequencing_run_logs/230119_B001_Lib/2023_01_19_sequencing_run_log_B001_P1toP8.csv",
+    "sample_info": "keylab/projects/2020_infantMbiome/Familien/Baby001/Library_Prep/2023_01_B001_Plate1to8/2022_12_12allPrepFORLibrary.xlsx",
+    "seq_info_url": "https://transfer.mpiib-berlin.mpg.de/remote.php/dav/files/63595F6C-C750-4D11-B19C-4D850BB5C0B1/keylab/sequencing_records/sequencing_run_logs/230119_B001_Lib/2023_01_19_sequencing_run_log_B001_P1toP8.csv",
+    "sample_info_url": "https://transfer.mpiib-berlin.mpg.de/remote.php/dav/files/63595F6C-C750-4D11-B19C-4D850BB5C0B1/keylab/projects/2020_infantMbiome/Familien/Baby001/Library_Prep/2023_01_B001_Plate1to8/2022_12_12allPrepFORLibrary.xlsx"
+  }
 }
