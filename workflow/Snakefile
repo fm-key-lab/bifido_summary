@@ -28,15 +28,21 @@ wildcard_constraints:
     donors=config['wildcards']['donors'],
     relationships=config['wildcards']['relationships'],
     species=config['wildcards']['species'],
-    # time_cat=config['wildcards']['time_cat']
+
+
+EXCLUDE = [313, 324] # TODO
+
+DBS = [
+    'samplesheet',
+    'abundance',
+    'all_variants',
+    'total_reads',
+]
 
 
 rule all:
     input:
-        multiext('results/samplesheet', '.duckdb', '.csv'),
-        'results/abundance.duckdb',
-        'results/all_variants.duckdb',
-        # 'results/phylogenies.done',
+        expand('results/{db}.duckdb', db=DBS)
     localrule: True
     default_target: True
 
@@ -48,5 +54,4 @@ onstart:
 
 onsuccess:
     shell(f'mkdir -p "/r/t/thosi/{config['run_id']}"')
-    # shell(f'rsync -au --progress config "/r/t/thosi/{config['run_id']}/"')
-    # shell(f'rsync -au --progress --exclude "work" --exclude "results/*/work" results "/r/t/thosi/{config['run_id']}/"')
+    shell(f'rsync -au --progress config "/r/t/thosi/{config['run_id']}/"')

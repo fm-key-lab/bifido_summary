@@ -1,7 +1,7 @@
 checkpoint mapping_samplesheet:
     input:
-        'results/samplesheet.csv',
-        'results/reference_genomes.csv'
+        ancient('results/samplesheet.csv'),
+        ancient('results/reference_genomes.csv')
     output:
         'results/{species}/mapping_samplesheet.csv'
     localrule: True
@@ -18,9 +18,8 @@ checkpoint mapping_samplesheet:
             .filter(['sample', 'fastq_1', 'fastq_2'])
         )
 
-        exclude = [313] # TODO
         mapping_samplesheet = mapping_samplesheet[
-            ~mapping_samplesheet['sample'].astype(int).isin(exclude)
+            ~mapping_samplesheet['sample'].astype(int).isin(EXCLUDE)
         ]
 
         mapping_samplesheet.to_csv(output[0], index=False)
@@ -28,7 +27,7 @@ checkpoint mapping_samplesheet:
 
 use rule bactmap from widevariant as mapping with:
     input:
-        input='results/{species}/mapping_samplesheet.csv',
+        input=ancient('results/{species}/mapping_samplesheet.csv'),
         reference=lambda wildcards: config['public_data']['reference'][wildcards.species],
     params:
         pipeline='bactmap',
@@ -37,6 +36,7 @@ use rule bactmap from widevariant as mapping with:
         outdir='results/{species}',
     output:
         'results/{species}/pipeline_info/pipeline_report.txt',
+        'results/{species}/multiqc/multiqc_data/multiqc_fastp.yaml',
     localrule: True
     envmodules:
         'apptainer/1.3.2',
@@ -51,7 +51,7 @@ rule collect_vcfs:
     resolved by downstream rules.
     """
     input:
-        'results/{species}/pipeline_info/pipeline_report.txt',
+        ancient('results/{species}/pipeline_info/pipeline_report.txt'),
     output:
         touch('results/{species}/variants/{sample}.vcf.gz'),
     localrule: True
