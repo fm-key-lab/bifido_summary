@@ -3,14 +3,19 @@
 	"wildcards": {
 		"donors": "B001",
 		"relationships": "F|M|B",
-		"species": "Bifidobacterium_adolescentis|Bifidobacterium_bifidum|Bifidobacterium_longum|Enterococcus_faecalis|Escherichia_coli"
+		"species": "Bifidobacterium_bifidum|Bifidobacterium_longum|Enterococcus_faecalis|Escherichia_coli|Staphylococcus_aureus"
 	},
-	"variants_thresh": {
+	"mapping": {
+		"min_frac_ref": ".5",
+		"min_pow_ref": 3
+	},
+	"variants": {
+		"base_qual": 30,
 		"reads_alt": 3,
-		"coverage": 5,
+		"coverage": 20,
 		"interpos_dist": 500,
 		"maf": ".95",
 		"qual": 30
 	},
-	"run_id": "20240921_bifido_all"
+	"run_id": "20241024_bifido_all"
 }

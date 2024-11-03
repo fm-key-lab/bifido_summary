@@ -3,8 +3,10 @@ def paired_fastqs(wildcards):
 
     return (
         pd.read_csv(
-            checkpoints.samplesheet.get(**wildcards).output[1]
+            checkpoints.fastqs.get(**wildcards).output[0]
         )
+        # NOTE: Not all FASTQs can be resolved to IDs
+        .dropna()
         .query(
             f"sample == {wildcards['sample']}"
         )
@@ -33,6 +35,7 @@ rule kraken2:
     shell:
         '''
         export OMP_PLACES=threads
+        
         kraken2 \
           --db {params.db} \
           --threads {resources.cpus_per_task} \
@@ -61,15 +64,15 @@ rule bracken:
         'bracken -d {params.db} -r 100 -i {input} -o {output[0]} -w {output[1]}'
 
 
-def species_abundance_output(wildcards):
+def abundance_output(wildcards):
     import pandas as pd
 
     sample_ids = (
         pd.read_csv(
-            checkpoints.samplesheet.get(
-                **wildcards
-            ).output[1]
+            checkpoints.fastqs.get(**wildcards).output[0]
         )
+        # NOTE: Not all FASTQs can be resolved to IDs
+        .dropna()
         ['sample'].astype(str)
     )
 
@@ -82,14 +85,13 @@ def species_abundance_output(wildcards):
     )
 
 
-checkpoint reference_genomes:
+rule:
     input:
-        species_abundance_output
-    params:
-        bracken_glob="'results/bracken/*.bracken'"
+        abundance_output
     output:
-        'results/abundance.duckdb',
-        'results/reference_genomes.csv'
+        'data_lake/indexes/abundance.duckdb',
+    params:
+        glob="'results/bracken/*.bracken'"
     resources:
         cpus_per_task=8,
         mem_mb=4_000,
@@ -98,12 +100,32 @@ checkpoint reference_genomes:
         'duckdb/nightly'
     shell:
         '''
-        export MEMORY_LIMIT="$(({resources.mem_mb} / 1000))GB" \
-               BRACKEN_GLOB={params.bracken_glob}
+        export MEMORY_LIMIT="$(({resources.mem_mb} / 1200))GB"
+        export GLOB={params.glob}
         
-        duckdb -init workflow/scripts/create_abundance_db.sql {output[0]} \
-            -c ".read workflow/scripts/parse_abundance_taxa.sql"
+        duckdb -init config/.duckdbrc {output} \
+          -c ".read workflow/scripts/clean_bracken_output.sql"
+        '''
 
-        duckdb -csv -init workflow/scripts/parse_abundance_taxa.sql {output[0]} \
-            -c "set enable_progress_bar = false; copy reference_genomes to '/dev/stdout';" > {output[1]}
+
+checkpoint reference_genomes:
+    input:
+        samples='data_lake/indexes/samples.duckdb',
+        abundance='data_lake/indexes/abundance.duckdb',
+    output:
+        'results/samplesheets/reference_genomes.csv'
+    params:
+        read_frac=config['mapping']['min_frac_ref'],
+        read_pow=config['mapping']['min_pow_ref'],
+    localrule: True
+    envmodules:
+        'duckdb/nightly'
+    shell:
+        '''
+        export READ_FRAC={params.read_frac} READ_POW={params.read_pow}
+
+        duckdb -readonly -init config/.duckdbrc {input.samples} \
+          -c 'copy (select "sample", ID, taxon from samples) to "/dev/stdout" (format csv);' |\
+        duckdb -readonly -init config/.duckdbrc {input.abundance} \
+          -c '.read workflow/scripts/match_reference_genome.sql' > {output}
         '''

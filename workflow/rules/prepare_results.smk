@@ -14,7 +14,7 @@ rule record_total_reads:
         'duckdb/nightly'
     shell:
         '''
-        export MEMORY_LIMIT="$(({resources.mem_mb} / 1000))GB"
+        export MEMORY_LIMIT="$(({resources.mem_mb} / 1100))GB"
 
         yq -o=csv '.[] | [key, .summary.before_filtering.total_reads, .summary.after_filtering.total_reads]' {input} |\
           duckdb {output} -c ".read workflow/scripts/parse_fastp_multiqc_output.sql"

@@ -1,7 +1,7 @@
 {
   "data": {
     "directory": "/ptmp/thosi/datasets/230119_B001_Lib/data/",
-    "pat": "r'S\\d+_R([12])_001.fastq.gz'"
+    "pat": "'/(\\d+_B001)_Lib/data/mpimg_L\\d+-\\d_(B001-\\d+)_S\\d+_R(1|2)_001.fastq.gz'"
   },
   "samplesheet": {
     "seq_info": "keylab/sequencing_records/sequencing_run_logs/230119_B001_Lib/2023_01_19_sequencing_run_log_B001_P1toP8.csv",

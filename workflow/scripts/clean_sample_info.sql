@@ -1,6 +1,3 @@
-set memory_limit = getenv('MEMORY_LIMIT');
-set threads = getenv('SLURM_CPUS_PER_TASK');
-
 load spatial;
 
 create table samples as 
@@ -13,7 +10,7 @@ with combined_tmp as (
             , regexp_extract(Field3, '^(\D+)-', 1) as relationship_raw
             , regexp_extract(Field3, '-(\w+)$', 1) as time_cat
         from st_read(
-            getenv('SAMPLESHEET'),
+            getenv('SAMPLE_INFO'),
             layer = 'LibraryPlate1-3',
             open_options = ['HEADERS=FORCE']
         )
@@ -28,7 +25,7 @@ with combined_tmp as (
             , Field6 as relationship_raw
             , Field7 as time_cat
         from st_read(
-            getenv('SAMPLESHEET'),
+            getenv('SAMPLE_INFO'),
             layer = 'LibraryPlate4-8'
         )
     )

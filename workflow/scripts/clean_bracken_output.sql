@@ -10,7 +10,7 @@ select
     ) as "sample"
     , * exclude("filename")
 from read_csv(
-    getenv('BRACKEN_GLOB'),
+    getenv('GLOB'),
 	auto_detect = false,
 	header = true,
 	delim = '\t',

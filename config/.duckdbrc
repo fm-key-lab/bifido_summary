@@ -1,0 +1,5 @@
+.bail on
+
+set enable_progress_bar = true;
+set memory_limit = '4GB';
+set threads = 1;

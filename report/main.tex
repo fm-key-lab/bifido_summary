@@ -1,0 +1,64 @@
+\documentclass{article}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage[colorlinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref} % Load after hyperref
+
+\geometry{margin=2cm}
+
+\definecolor{brick-red}{RGB}{203,65,84}
+
+\lstset{
+    backgroundcolor=\color[gray]{0.95},
+    basicstyle=\ttfamily\footnotesize,
+    commentstyle=\color{brick-red},
+    frame=single,
+    framerule=0pt,
+    framextopmargin=1em,
+    framexbottommargin=1em,
+    framexleftmargin=1em,
+    framexrightmargin=1em,
+    keepspaces=true,
+    numbers=none,
+    showstringspaces=false,
+    xrightmargin=2em,
+    xleftmargin=2em,
+}
+
+\definecolor{cite-color}{RGB}{206,34,120}
+\definecolor{link-color}{RGB}{28,172,184}
+\definecolor{file-color}{RGB}{124,195,3}
+\definecolor{url-color}{RGB}{102,35,175}
+
+\AtBeginDocument{
+	\hypersetup{
+	    citecolor=link-color,
+	    linkcolor=cite-color,
+	    filecolor=file-color,
+	    urlcolor=url-color
+	}
+ }
+
+\title{Bifido}
+
+\author{thomas silvers}
+
+\begin{document}
+
+\maketitle
+
+% TODO After fixing indexes, not every sample is present (e.g., B001_0003). See null ID values in 'data_lake/indexes/fastqs.csv'
+
+\section{Appendix}
+
+Code to reproduce is available on GitHub at \href{https://github.com/t-silvers/bifido-summary}{t-silvers/bifido-summary}.
+
+\end{document}
